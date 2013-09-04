@@ -21,7 +21,7 @@ class EDD_Cache_Helper {
 	/**
 	 * Constructor.
 	 *
-	 * @access protected
+	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
