@@ -583,12 +583,11 @@ class EDD_API {
 	 * @return array $customers Multidimensional array of the customers
 	 */
 	public function get_customers( $customer = null ) {
-
 		$customers = array();
 
-		if( ! user_can( $this->user_id, 'view_shop_sensitive_data' ) && ! $this->override ) {
+		// Bail if the user can't access sensitive data
+		if ( ! user_can( $this->user_id, 'view_shop_sensitive_data' ) && ! $this->override )
 			return $customers;
-		}
 
 		if ( $customer == null ) {
 			global $wpdb;
@@ -663,7 +662,6 @@ class EDD_API {
 	 * @return array $customers Multidimensional array of the products
 	 */
 	public function get_products( $product = null ) {
-
 		$products = array();
 
 		if ( $product == null ) {
@@ -699,7 +697,7 @@ class EDD_API {
 						$products['products'][$i]['pricing']['amount'] = edd_get_download_price( $product_info->ID );
 					}
 
-					if( user_can( $this->user_id, 'view_shop_sensitive_data' ) || $this->override ) {
+					if ( user_can( $this->user_id, 'view_shop_sensitive_data' ) || $this->override ) {
 						foreach ( edd_get_download_files( $product_info->ID ) as $file ) {
 							$products['products'][$i]['files'][] = $file;
 						}
@@ -781,7 +779,8 @@ class EDD_API {
 		$earnings = array();
 		$sales    = array();
 
-		if( ! user_can( $this->user_id, 'view_shop_reports' ) && ! $this->override ) {
+		// Check the uesr can view shop reports
+		if ( ! user_can( $this->user_id, 'view_shop_reports' ) && ! $this->override ) {
 			return $stats;
 		}
 
@@ -822,6 +821,7 @@ class EDD_API {
 							$month_end   = 12;
 						}
 
+						// Loop through the months
 						$i = $month_start;
 						while ( $i <= $month_end ) :
 
@@ -924,13 +924,12 @@ class EDD_API {
 
 						$i = $month_start;
 						while ( $i <= $month_end ) :
-
-							if( $i == $dates['m_start'] )
+							if ( $i == $dates['m_start'] )
 								$d = $dates['day_start'];
 							else
 								$d = 1;
 
-							if( $i == $dates['m_end'] )
+							if ( $i == $dates['m_end'] )
 								$num_of_days = $dates['day_end'];
 							else
 								$num_of_days = cal_days_in_month( CAL_GREGORIAN, $i, $y );
@@ -969,6 +968,7 @@ class EDD_API {
 			} elseif ( $args['product'] == 'all' ) {
 				$products = get_posts( array( 'post_type' => 'download', 'nopaging' => true ) );
 
+				// Loop through all of the products
 				$i = 0;
 				foreach ( $products as $product_info ) {
 					$earnings['earnings'][ $i ] = array( $product_info->post_name => edd_get_download_earnings_stats( $product_info->ID ) );
@@ -1015,13 +1015,14 @@ class EDD_API {
 	public function get_recent_sales() {
 		$sales = array();
 
-		if( ! user_can( $this->user_id, 'view_shop_reports' ) && ! $this->override ) {
+		// Checl the user can view shop reports
+		if ( ! user_can( $this->user_id, 'view_shop_reports' ) && ! $this->override )
 			return $sales;
-		}
 
 		$query = edd_get_payments( array( 'number' => $this->per_page(), 'page' => $this->get_paged(), 'status' => 'publish' ) );
 
 		if ( $query ) {
+			// Loop through everything that's been returned
 			$i = 0;
 			foreach ( $query as $payment ) {
 				$payment_meta          = edd_get_payment_meta( $payment->ID );
@@ -1041,10 +1042,12 @@ class EDD_API {
 
 				$c = 0;
 
+				// Loop through all the items that were in the cart
 				foreach ( $cart_items as $key => $item ) {
 					$price_override = isset( $payment_meta['cart_details'] ) ? $item['price'] : null;
 					$price          = edd_get_download_final_price( $item['id'], $user_info, $price_override );
 
+					// Check for variable prices and alter the price name, as necessary
 					if ( isset( $cart_items[ $key ]['item_number'] ) ) {
 						$price_name     = '';
 						$price_options  = $cart_items[ $key ]['item_number']['options'];
@@ -1076,15 +1079,13 @@ class EDD_API {
 	 * @return array $discounts Multidimensional array of the discounts
 	 */
 	public function get_discounts( $discount = null ) {
-
 		$discount_list = array();
 
-		if( ! user_can( $this->user_id, 'manage_shop_discounts' ) && ! $this->override ) {
+		// Check the user can manage shop discounts
+		if ( ! user_can( $this->user_id, 'manage_shop_discounts' ) && ! $this->override )
 			return $discount_list;
-		}
 
 		if ( empty( $discount ) ) {
-
 			global $wpdb;
 
 			$paged     = $this->get_paged();
@@ -1092,31 +1093,28 @@ class EDD_API {
 			$discounts = edd_get_discounts( array( 'posts_per_page' => $per_page, 'paged' => $paged ) );
 			$count     = 0;
 
+			// Loop through all of the discounts
 			foreach ( $discounts as $discount ) {
-
-				$discount_list['discounts'][$count]['ID']                    = $discount->ID;
-				$discount_list['discounts'][$count]['name']                  = $discount->post_title;
-				$discount_list['discounts'][$count]['code']                  = edd_get_discount_code( $discount->ID );
-				$discount_list['discounts'][$count]['amount']                = edd_get_discount_amount( $discount->ID );
-				$discount_list['discounts'][$count]['min_price']             = edd_get_discount_min_price( $discount->ID );
-				$discount_list['discounts'][$count]['type']                  = edd_get_discount_type( $discount->ID );
-				$discount_list['discounts'][$count]['uses']                  = edd_get_discount_uses( $discount->ID );
-				$discount_list['discounts'][$count]['max_uses']              = edd_get_discount_max_uses( $discount->ID );
-				$discount_list['discounts'][$count]['start_date']            = edd_get_discount_start_date( $discount->ID );
-				$discount_list['discounts'][$count]['exp_date']              = edd_get_discount_expiration( $discount->ID );
-				$discount_list['discounts'][$count]['status']                = $discount->post_status;
-				$discount_list['discounts'][$count]['product_requirements']  = edd_get_discount_product_reqs( $discount->ID );
-				$discount_list['discounts'][$count]['requirement_condition'] = edd_get_discount_product_condition( $discount->ID );
-				$discount_list['discounts'][$count]['global_discount']       = edd_is_discount_not_global( $discount->ID );
-				$discount_list['discounts'][$count]['single_use']            = edd_discount_is_single_use( $discount->ID );
+				$discount_list['discounts'][ $count ]['ID']                    = $discount->ID;
+				$discount_list['discounts'][ $count ]['name']                  = $discount->post_title;
+				$discount_list['discounts'][ $count ]['code']                  = edd_get_discount_code( $discount->ID );
+				$discount_list['discounts'][ $count ]['amount']                = edd_get_discount_amount( $discount->ID );
+				$discount_list['discounts'][ $count ]['min_price']             = edd_get_discount_min_price( $discount->ID );
+				$discount_list['discounts'][ $count ]['type']                  = edd_get_discount_type( $discount->ID );
+				$discount_list['discounts'][ $count ]['uses']                  = edd_get_discount_uses( $discount->ID );
+				$discount_list['discounts'][ $count ]['max_uses']              = edd_get_discount_max_uses( $discount->ID );
+				$discount_list['discounts'][ $count ]['start_date']            = edd_get_discount_start_date( $discount->ID );
+				$discount_list['discounts'][ $count ]['exp_date']              = edd_get_discount_expiration( $discount->ID );
+				$discount_list['discounts'][ $count ]['status']                = $discount->post_status;
+				$discount_list['discounts'][ $count ]['product_requirements']  = edd_get_discount_product_reqs( $discount->ID );
+				$discount_list['discounts'][ $count ]['requirement_condition'] = edd_get_discount_product_condition( $discount->ID );
+				$discount_list['discounts'][ $count ]['global_discount']       = edd_is_discount_not_global( $discount->ID );
+				$discount_list['discounts'][ $count ]['single_use']            = edd_discount_is_single_use( $discount->ID );
 
 				$count++;
 			}
-
 		} else {
-
 			if ( is_numeric( $discount ) && get_post( $discount ) ) {
-
 				$discount_list['discounts'][0]['ID']                         = $discount;
 				$discount_list['discounts'][0]['name']                       = get_post_field( 'post_title', $discount );
 				$discount_list['discounts'][0]['code']                       = edd_get_discount_code( $discount );
@@ -1132,19 +1130,14 @@ class EDD_API {
 				$discount_list['discounts'][0]['requirement_condition']      = edd_get_discount_product_condition( $discount );
 				$discount_list['discounts'][0]['global_discount']            = edd_is_discount_not_global( $discount );
 				$discount_list['discounts'][0]['single_use']                 = edd_discount_is_single_use( $discount );
-
 			} else {
-
 				$error['error'] = sprintf( __( 'Discount %s not found!', 'edd' ), $discount );
 				return $error;
-
 			}
-
 		}
 
 		return $discount_list;
 	}
-
 
 	/**
 	 * Log each API request, if enabled
@@ -1157,11 +1150,13 @@ class EDD_API {
 	 * @return void
 	 */
 	private function log_request( $data = array() ) {
+		// Bail if log requests are disabled
 		if ( ! $this->log_requests )
 			return;
 
 		global $edd_logs, $wp_query;
 
+		// Build the query
 		$query = array(
 			'key'       => $wp_query->query_vars['key'],
 			'query'     => isset( $wp_query->query_vars['query'] )     ? $wp_query->query_vars['query']     : null,
@@ -1173,12 +1168,14 @@ class EDD_API {
 			'enddate'   => isset( $wp_query->query_vars['enddate'] )   ? $wp_query->query_vars['enddate']   : null,
 		);
 
+		// Build the data that will be added to the log
 		$log_data = array(
 			'log_type'     => 'api_request',
 			'post_excerpt' => http_build_query( $query ),
 			'post_content' => ! empty( $data['error'] ) ? $data['error'] : '',
 		);
 
+		// Build the meta for that log entry
 		$log_meta = array(
 			'request_ip' => edd_get_ip(),
 			'user'       => $this->user_id,
@@ -1241,7 +1238,6 @@ class EDD_API {
 
 				break;
 
-
 			default :
 
 				// Allow other formats to be added via extensions
@@ -1271,6 +1267,7 @@ class EDD_API {
 	function user_key_field( $user ) {
 		global $edd_options;
 
+		// Check if API keys are allowed to be generated and that the current user has the correct access
 		if ( ( isset( $edd_options['api_allow_user_keys'] ) || current_user_can( 'manage_shop_settings' ) ) && current_user_can( 'view_shop_reports' ) ) {
 			$user = get_userdata( $user->ID );
 			?>
@@ -1294,7 +1291,7 @@ class EDD_API {
 						</td>
 					</tr>
 				</tbody>
-			</table>
+			</table><!-- /.form-table -->
 		<?php }
 	}
 
@@ -1313,6 +1310,7 @@ class EDD_API {
 		if ( current_user_can( 'edit_user', $user_id ) && isset( $_POST['edd_set_api_key'] ) ) {
 			$user = get_userdata( $user_id );
 
+			// If a public key doesn't exist, generates a key otherwise, it deletes it
 			if ( empty( $user->edd_user_public_key ) ) {
 				$public = hash( 'md5', $user->user_email . date( 'U' ) );
 				update_user_meta( $user_id, 'edd_user_public_key', $public );
@@ -1320,6 +1318,7 @@ class EDD_API {
 				delete_user_meta( $user_id, 'edd_user_public_key' );
 			}
 
+			// If a secret key doesn't exist, generates a key otherwise, it deletes it
 			if ( empty( $user->edd_user_secret_key ) ) {
 				$secret = hash( 'md5', $user->ID . date( 'U' ) );
 				update_user_meta( $user_id, 'edd_user_secret_key', $secret );

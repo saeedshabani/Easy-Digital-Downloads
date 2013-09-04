@@ -30,6 +30,7 @@ class EDD_HTML_Elements {
 	 * @return string $output Product dropdown
 	 */
 	public function product_dropdown( $name = 'edd_products', $selected = 0 ) {
+		// Get all the downloads from the database
 		$products = get_posts( array(
 			'post_type' => 'download',
 			'nopaging'  => true,
@@ -37,6 +38,7 @@ class EDD_HTML_Elements {
 			'order'     => 'ASC'
 		) );
 
+		// Loop through all the downloads returned
 		if ( $products ) {
 			foreach ( $products as $product ) {
 				$options[ absint( $product->ID ) ] = esc_html( get_the_title( $product->ID ) );
@@ -45,6 +47,7 @@ class EDD_HTML_Elements {
 			$options[0] = __( 'No products found', 'edd' );
 		}
 
+		// Build the HTML element
 		$output = $this->select( array(
 			'name'             => $name,
 			'selected'         => $selected,
@@ -75,6 +78,7 @@ class EDD_HTML_Elements {
 		$discounts = edd_get_discounts( $args );
 		$options   = array();
 
+		// Loop through all the discounts returned
 		if ( $discounts ) {
 			foreach ( $discounts as $discount ) {
 				$options[ absint( $discount->ID ) ] = esc_html( get_the_title( $discount->ID ) );
@@ -83,6 +87,7 @@ class EDD_HTML_Elements {
 			$options[0] = __( 'No discounts found', 'edd' );
 		}
 
+		// Build the HTML element
 		$output = $this->select( array(
 			'name'             => $name,
 			'selected'         => $selected,
@@ -107,10 +112,14 @@ class EDD_HTML_Elements {
 		$categories = get_terms( 'download_category', apply_filters( 'edd_category_dropdown', array() ) );
 		$options    = array();
 
-		foreach ( $categories as $category ) {
-			$options[ absint( $category->term_id ) ] = esc_html( $category->name );
+		// Loop through all the taxonomies
+		if ( $categories ) {
+			foreach ( $categories as $category ) {
+				$options[ absint( $category->term_id ) ] = esc_html( $category->name );
+			}
 		}
 
+		// Build the HTML element
 		$output = $this->select( array(
 			'name'             => $name,
 			'selected'         => $selected,
@@ -136,11 +145,13 @@ class EDD_HTML_Elements {
 		$year     = $current - 5;
 		$selected = empty( $selected ) ? date( 'Y' ) : $selected;
 
+		// Loop through the last five years
 		while ( $year <= $current ) {
 			$options[ absint( $year ) ] = $year;
 			$year++;
 		}
 
+		// Build the HTML element
 		$output = $this->select( array(
 			'name'             => $name,
 			'selected'         => $selected,
@@ -165,11 +176,13 @@ class EDD_HTML_Elements {
 		$month   = 1;
 		$options = array();
 
+		// Loop through the last 12 months
 		while ( $month <= 12 ) {
 			$options[ absint( $month ) ] = edd_month_num_to_name( $month );
 			$month++;
 		}
 
+		// Build up the HTML element
 		$output = $this->select( array(
 			'name'             => $name,
 			'selected'         => $selected,
@@ -201,6 +214,7 @@ class EDD_HTML_Elements {
 			'show_option_none' => _x( 'None', 'no dropdown items', 'edd' )
 		);
 
+		// Merge the arguments passed via the functions with the defaults
 		$args = wp_parse_args( $args, $defaults );
 
 		$output = '<select name="' . esc_attr( $args[ 'name' ] ) . '" id="' . esc_attr( $args[ 'name' ] ) . '" class="edd-select ' . esc_attr( $args[ 'name'] ) . '">';

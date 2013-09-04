@@ -26,7 +26,6 @@ function edd_is_ajax_enabled() {
 	return apply_filters( 'edd_is_ajax_enabled', $retval );
 }
 
-
 /**
  * Get AJAX URL
  *
@@ -83,19 +82,19 @@ function edd_ajax_add_to_cart() {
 		foreach ( $to_add as $options ) {
 			if ( ! edd_item_in_cart( $_POST['download_id'], $options ) ) {
 
-				if( $_POST['download_id'] == $options['price_id'] )
+				if ( $_POST['download_id'] == $options['price_id'] )
 					$options = array();
 
-				$key          = edd_add_to_cart( $_POST['download_id'], $options );
+				$key = edd_add_to_cart( $_POST['download_id'], $options );
 
-				$item         = array(
+				$item = array(
 					'id'      => $_POST['download_id'],
 					'options' => $options
 				);
 
 				$item = apply_filters( 'edd_ajax_pre_cart_item_template', $item );
 
-				$cart_item    = edd_get_cart_item_template( $key, $item, true );
+				$cart_item = edd_get_cart_item_template( $key, $item, true );
 
 				echo $cart_item;
 			} else {

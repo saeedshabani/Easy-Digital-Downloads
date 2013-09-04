@@ -1,7 +1,4 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 /**
  * Cache helper
  *
@@ -10,18 +7,25 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @copyright   Copyright (c) 2013, Pippin Williamson
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
  * @since       1.7
-*/
-class EDD_Cache_Helper {
+ */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * EDD_Cache_Helper Class
+ *
+ * @package EDD
+ * @since 1.7
+ */
+class EDD_Cache_Helper {
 	/**
-	 * __construct function.
+	 * Constructor.
 	 *
-	 * @access public
+	 * @access protected
 	 * @return void
 	 */
 	public function __construct() {
-
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init',          array( $this, 'init'    ) );
 		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 
@@ -32,12 +36,10 @@ class EDD_Cache_Helper {
 	 * @return void
 	 */
 	public function init() {
-
 		if ( false === ( $page_uris = get_transient( 'edd_cache_excluded_uris' ) ) ) {
-
 			global $edd_options;
 
-			if( empty( $edd_options['purchase_page'] ) | empty( $edd_options['success_page'] ) )
+			if ( empty( $edd_options['purchase_page'] ) | empty( $edd_options['success_page'] ) )
 				return;
 
 			$page_uris   = array();
@@ -58,6 +60,7 @@ class EDD_Cache_Helper {
 	    	set_transient( 'edd_cache_excluded_uris', $page_uris );
 		}
 
+		// Loop through all of the URLs and call the nocache() function
 		if ( is_array( $page_uris ) ) {
 			foreach( $page_uris as $uri ) {
 				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
@@ -88,7 +91,6 @@ class EDD_Cache_Helper {
 	 * @return void
 	 */
 	public function notices() {
-
 		// W3 Total Cache
 		if ( function_exists( 'w3tc_pgcache_flush' ) && function_exists( 'w3_instance' ) ) {
 
@@ -104,8 +106,7 @@ class EDD_Cache_Helper {
 				<?php
 			}
 		}
-
 	}
 }
 
-new EDD_Cache_Helper();
+new EDD_Cache_Helper;

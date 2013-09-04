@@ -34,21 +34,30 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 if ( ! class_exists( 'Easy_Digital_Downloads' ) ) :
 
 /**
- * Main Easy_Digital_Downloads Class
+ * Easy_Digital_Downloads Class
  *
+ * @package EDD
  * @since 1.4
  */
 final class Easy_Digital_Downloads {
 	/** Singleton *************************************************************/
 
 	/**
-	 * @var Easy_Digital_Downloads The one true Easy_Digital_Downloads
+	 * Holds the instance
+	 *
+	 * Ensures that only one instance of EDD Reviews exists in memory at any one
+	 * time and it also prevents needing to define globals all over the place.
+	 *
+	 * TL;DR This is a static property property that holds the singleton instance.
+	 *
+	 * @var object
+	 * @static
 	 * @since 1.4
 	 */
 	private static $instance;
 
 	/**
-	 *  EDD User Roles and Capabilities Object
+	 * EDD User Roles and Capabilities Object
 	 *
 	 * @var object
 	 * @since 1.4.4
@@ -90,12 +99,11 @@ final class Easy_Digital_Downloads {
 	 */
 	public $html;
 
-
 	/**
 	 * Main Easy_Digital_Downloads Instance
 	 *
-	 * Insures that only one instance of Easy_Digital_Downloads exists in memory at any one
-	 * time. Also prevents needing to define globals all over the place.
+	 * Get the instance and store the class inside it. This plugin utilises
+	 * the PHP singleton design pattern.
 	 *
 	 * @since 1.4
 	 * @static
@@ -299,7 +307,6 @@ final class Easy_Digital_Downloads {
 }
 
 endif; // End if class_exists check
-
 
 /**
  * The main function responsible for returning the one true Easy_Digital_Downloads

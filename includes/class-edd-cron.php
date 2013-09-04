@@ -87,4 +87,5 @@ class EDD_Cron {
 		}
 	}
 }
+
 $edd_cron = new EDD_Cron;

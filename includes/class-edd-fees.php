@@ -46,10 +46,13 @@ class EDD_Fees {
 	public function add_fee( $amount = '', $label = '', $id = '' ) {
 		$fees = $this->get_fees();
 
+		// Sanitize the data
 		$key = empty( $id ) ? sanitize_key( $label ) : sanitize_key( $id );
 
+		// Add the fee to the associative array
 		$fees[ $key ] = array( 'amount' => $amount, 'label' => $label );
 
+		// Add the fee to the session
 		EDD()->session->set( 'edd_cart_fees', $fees );
 
 		return $fees;
@@ -68,9 +71,9 @@ class EDD_Fees {
 	public function remove_fee( $id = '' ) {
 		$fees = $this->get_fees();
 
-		if ( isset( $fees[ $id ] ) ) {
+		// Checks if the fee exists, then deletes it from the array
+		if ( isset( $fees[ $id ] ) )
 			unset( $fees[ $id ] );
-		}
 
 		EDD()->session->set( 'edd_cart_fees', $fees );
 
