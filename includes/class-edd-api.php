@@ -1015,7 +1015,7 @@ class EDD_API {
 	public function get_recent_sales() {
 		$sales = array();
 
-		// Checl the user can view shop reports
+		// Check the user can view shop reports
 		if ( ! user_can( $this->user_id, 'view_shop_reports' ) && ! $this->override )
 			return $sales;
 

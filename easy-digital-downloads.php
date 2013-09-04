@@ -45,7 +45,7 @@ final class Easy_Digital_Downloads {
 	/**
 	 * Holds the instance
 	 *
-	 * Ensures that only one instance of EDD Reviews exists in memory at any one
+	 * Ensures that only one instance of EDD exists in memory at any one
 	 * time and it also prevents needing to define globals all over the place.
 	 *
 	 * TL;DR This is a static property property that holds the singleton instance.
