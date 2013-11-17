@@ -179,8 +179,7 @@ $payment_date = strtotime( $item->post_date );
 										$i = 0;
 										foreach ( $cart_items as $key => $cart_item ) :
 											$id = isset( $payment_meta['cart_details'] ) ? $cart_item['id'] : $cart_item;
-											$price_override = isset( $payment_meta['cart_details'] ) ? $cart_item['price'] : null;
-											$price = edd_get_download_final_price( $id, $user_info, $price_override );
+											$price = $cart_item[ 'price' ];
 											?>
 											<tr class="<?php if ( $i % 2 == 0 ) { echo 'alternate'; } ?>">
 												<td class="name column-name">
