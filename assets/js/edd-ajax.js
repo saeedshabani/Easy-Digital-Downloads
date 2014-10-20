@@ -107,17 +107,17 @@ jQuery(document).ready(function ($) {
             if ( $('.edd_price_option_' + download).is('input:hidden') ) {
             	item_price_ids[0] = $('.edd_price_option_' + download).val();
             } else {
-	            if( ! $('.edd_price_option_' + download + ':checked', form).length ) {
-	                 // hide the spinner
-	                $this.removeAttr( 'data-edd-loading' );
-	                alert( edd_scripts.select_option );
-	                return;
-	            }
+                if( ! $('.edd_price_option_' + download + ':checked', form).length ) {
+                     // hide the spinner
+                    $this.removeAttr( 'data-edd-loading' );
+                    alert( edd_scripts.select_option );
+                    return;
+                }
 
-	            $('.edd_price_option_' + download + ':checked', form).each(function( index ) {
-	                item_price_ids[ index ] = $(this).val();
-	            });
-        	}
+                $('.edd_price_option_' + download + ':checked', form).each(function( index ) {
+                    item_price_ids[ index ] = $(this).val();
+                });
+            }
 
         } else {
             item_price_ids[0] = download;
