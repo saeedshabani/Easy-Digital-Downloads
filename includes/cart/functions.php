@@ -997,7 +997,6 @@ function edd_save_cart( $user_cart = true ) {
 	$user_id  = get_current_user_id();
 	$cart     = EDD()->session->get( 'edd_cart' );
 	$token    = edd_generate_cart_token( serialize( $cart ) );
-	var_dump($token);
 	$messages = EDD()->session->get( 'edd_cart_messages' );
 
 	if ( is_user_logged_in() && $user_cart ) {
