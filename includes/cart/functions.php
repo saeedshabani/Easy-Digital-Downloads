@@ -988,7 +988,7 @@ function edd_is_cart_saved() {
  * @since 1.8
  * @return bool
  */
-function edd_save_cart() {
+function edd_save_cart( $user_cart = true ) {
 	global $edd_options;
 
 	if ( edd_is_cart_saving_disabled() )
@@ -996,20 +996,18 @@ function edd_save_cart() {
 
 	$user_id  = get_current_user_id();
 	$cart     = EDD()->session->get( 'edd_cart' );
-	$token    = edd_generate_cart_token();
+	$token    = edd_generate_cart_token( serialize( $cart ) );
+	var_dump($token);
 	$messages = EDD()->session->get( 'edd_cart_messages' );
 
-	if ( is_user_logged_in() ) {
+	if ( is_user_logged_in() && $user_cart ) {
 
 		update_user_meta( $user_id, 'edd_saved_cart', $cart, false );
 		update_user_meta( $user_id, 'edd_cart_token', $token, false );
 
 	} else {
 
-		$cart = serialize( $cart );
-
-		setcookie( 'edd_saved_cart', $cart, time()+3600*24*7, COOKIEPATH, COOKIE_DOMAIN );
-		setcookie( 'edd_cart_token', $token, time()+3600*24*7, COOKIEPATH, COOKIE_DOMAIN );
+		set_transient( 'eddcart-' . $token, $cart, WEEK_IN_SECONDS );
 
 	}
 
@@ -1086,6 +1084,17 @@ function edd_restore_cart() {
 		setcookie( 'edd_saved_cart', '', time()-3600, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'edd_cart_token', '', time()-3600, COOKIEPATH, COOKIE_DOMAIN );
 
+	} else {
+
+		$saved_cart = get_transient( 'eddcart-' . $_GET['edd_cart_token'] );
+
+		if ( !$saved_cart ) {
+			$messages['edd_cart_restoration_failed'] = sprintf( '<strong>%1$s</strong>: %2$s', __( 'Error', 'edd' ), __( 'Cart restoration failed. Invalid token.', 'edd' ) );
+			EDD()->session->set( 'edd_cart_messages', $messages );
+
+			return new WP_Error( 'invalid_cart_token', __( 'The cart cannot be restored. Invalid token.', 'edd' ) );
+		}
+
 	}
 
 	$messages['edd_cart_restoration_successful'] = sprintf( '<strong>%1$s</strong>: %2$s', __( 'Success', 'edd' ), __( 'Cart restored successfully.', 'edd' ) );
@@ -1156,6 +1165,21 @@ function edd_delete_saved_carts() {
 			}
 		}
 	}
+
+	// Find any transient based carts older than 7 days, and run delete_transient on them
+	$expired_carts = $wpdb->get_results( "SELECT option_name
+		                                  FROM $wpdb->options
+		                                  WHERE option_name LIKE '_transient_timeout_eddcart-%'
+		                                  AND option_value < UNIX_TIMESTAMP( DATE_SUB( NOW(), INTERVAL 7 DAY ) )",
+		                                  ARRAY_A
+		                               );
+
+	if ( $expired_carts ) {
+		foreach ( $expired_carts as $expired_cart ) {
+			$expired_token = substr( $expired_cart['option_name'], -32 );
+			delete_transient( 'eddcart-' . $expired_token );
+		}
+	}
 }
 add_action( 'edd_weekly_scheduled_events', 'edd_delete_saved_carts' );
 
@@ -1165,6 +1189,8 @@ add_action( 'edd_weekly_scheduled_events', 'edd_delete_saved_carts' );
  * @since 1.8
  * @return string UNIX timestamp
  */
-function edd_generate_cart_token() {
-	return apply_filters( 'edd_generate_cart_token', time() );
+function edd_generate_cart_token( $cart = '' ) {
+	$token = md5( time() . $cart );
+
+	return apply_filters( 'edd_generate_cart_token', $token );
 }
